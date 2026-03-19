@@ -1,102 +1,97 @@
 # code-correctness
 
-clean code is not decoration. it is how code tells the truth.
+clean code is not about making code look expensive. it is about making code easier to trust.
 
-`code-correctness` is an agent skill for refactoring and reviewing existing code with more judgment than ceremony. it pushes an agent toward clearer naming, smaller and more honest functions, explicit side effects, better top-down flow, and stronger restraint when the best move is to leave good code alone.
+`code-correctness` is a skill for reviewing and refactoring existing code without falling into the usual ai habits: overexplaining, over-abstracting, renaming things into nonsense, or touching code that was fine to begin with.
 
-this skill was built from a transcript-derived clean-code guidance set, then tightened through iterative evals and adversarial checks focused on the thing most ai code still lacks: engineering judgment.
+it pushes toward better names, cleaner function boundaries, visible side effects, good restraint, and code that reads like it means what it says.
 
-## what it does
+## what it helps with
 
-- improves code readability without changing behavior unless change is clearly needed
-- fixes misleading names, mixed responsibilities, hidden side effects, and weak structure
-- preserves important domain comments when they carry real context
-- respects framework idioms, hot paths, public contracts, and test readability
-- avoids mechanical cleanup, wrapper explosion, and polish-only churn
-- knows when a zero-diff result is the right result
+- confusing names
+- long or mixed-responsibility functions
+- hidden side effects
+- stale or noisy comments
+- flag-heavy apis
+- code that is technically fine but annoying to read or risky to change
 
-## why this exists
+## what it does differently
 
-most ai refactors can make code look cleaner while making it less truthful.
-
-they over-abstract, flatten framework patterns, delete comments that still matter, or rename things into something louder but less accurate.
-
-this skill exists to push the agent toward code intent first:
-
-- the right name, not the fanciest one
-- the right helper, not the maximum number of helpers
-- the right amount of change, not change for its own sake
+- it treats restraint as a valid outcome
+- it keeps comments that still carry real context
+- it respects framework idioms and hot paths
+- it does not force DRY where repetition is clearer
+- it is tuned for code intent, not cleanup theater
 
 ## install
 
+### direct from github
+
+```bash
+npx skills add koikbr/code-correctness-skill
+```
+
+list what the repo exposes:
+
+```bash
+npx skills add koikbr/code-correctness-skill --list
+```
+
+install only this skill explicitly:
+
+```bash
+npx skills add koikbr/code-correctness-skill --skill code-correctness
+```
+
 ### manual
 
-copy or symlink this folder into your skills directory:
+copy or symlink the folder into your local skills directory:
 
 ```bash
 mkdir -p ~/.agents/skills
 cp -r code-correctness ~/.agents/skills/
 ```
 
-for Claude Code, the common location is:
+for Claude Code, a common location is:
 
 ```bash
 mkdir -p ~/.claude/skills
 cp -r code-correctness ~/.claude/skills/
 ```
 
-### packaged `.skill`
+## when to use it
 
-a packaged release artifact is also available as `code-correctness.skill`.
+use it when the task is about improving existing code, especially if the user says things like:
 
-## when it should trigger
+- this function is too long
+- these names are confusing
+- this code is hard to follow
+- please clean this up
+- refactor without changing behavior
+- make this easier to maintain
 
-use this skill when the task is about improving existing code quality, especially when the user says things like:
+## why it exists
 
-- “this function is too long”
-- “these names are confusing”
-- “this code is hard to follow”
-- “please clean this up”
-- “refactor without changing behavior”
-- “make this easier to maintain”
+a lot of ai refactors are almost right. that is the problem.
 
-## what makes it different
+they make code look cleaner while making it less honest. they add helpers nobody needed, flatten framework patterns that were there for a reason, delete comments that still matter, or keep changing good code because silence feels wrong.
 
-this skill is intentionally judgment-heavy.
-
-it was tightened not only against normal refactor fixtures, but also against adversarial cases where many models get worse when trying to be helpful:
-
-- already-good code where restraint should win
-- comments that carry protocol history or operational context
-- performance-sensitive loops
-- framework-specific idioms that look odd for good reasons
-- test files where clarity matters more than clever deduplication
-- api redesign cases where boldness is allowed and timidity is the real bug
-
-## evaluation approach
-
-the skill was iterated with:
-
-- transcript-aware grading based on the actual clean-code principles behind the source material
-- with-skill vs baseline comparisons across multiple iterations
-- adversarial evals designed to catch over-refactoring and weak engineering judgment
-
-the goal was not to reward syntactic cleanliness alone, but to reward code that becomes more truthful, more readable, and safer to change.
+this skill was built to push in the other direction.
 
 ## files
 
-- `SKILL.md` — the skill itself
-- `README.md` — public-facing overview and installation notes
+- `SKILL.md` - the skill instructions
+- `README.md` - overview and install notes
 
 ## support
 
 - website: https://koik.com.br
-- github: https://github.com/koikbr
-- support: oi@koik.com.br
+- github: https://github.com/koikbr/code-correctness-skill
+- email: oi@koik.com.br
 
 ## license
 
-GNU GPL v3.0 — see `SKILL.md` frontmatter for the declared license metadata.
+GPL-3.0
 
 ## author
 

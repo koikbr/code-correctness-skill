@@ -1,10 +1,10 @@
 ---
 name: code-correctness
-description: Apply clean-code and correctness-oriented refactors to existing code. Use this skill whenever the user wants a code review or refactor focused on readability, maintainability, naming, comments, function design, duplication, hidden side effects, flag arguments, command-query separation, abstraction level, file organization, or clean-code smells. Trigger even when the user does not say "clean code" and instead says things like "this function is too long," "these names are confusing," "this code is hard to follow," "please clean this up," "make this easier to maintain," or "refactor without changing behavior."
+description: Apply clean-code and correctness-oriented refactors to existing code. Use this skill for review or refactor work centered on readability, maintainability, naming, comments, function design, duplication, hidden side effects, flag arguments, command-query separation, abstraction level, file organization, or code that feels hard to follow, noisy, or harder to change than it should be.
 license: GPL-3.0
 metadata:
   authors: "koi"
-  version: "0.1.0"
+  version: "0.1.2"
   website: "https://koik.com.br"
   github: "https://github.com/koikbr/code-correctness-skill"
   support: "mailto:oi@koik.com.br"
@@ -12,697 +12,208 @@ metadata:
 
 # Code Correctness
 
-This skill is for changing or reviewing code using correctness principles drawn from clean-code practice.
+Use this skill when the problem is not just whether code runs, but whether the code tells the truth.
 
-Correctness is not only "the program runs." Code is also incorrect when it misleads the next reader, hides behavior behind vague names, mixes responsibilities, spreads duplication, or invites unsafe edits.
+Code gets written once and read over and over. When a name makes the reader stop, when a function mixes decisions with mechanics, when a comment tells the old story while the code tells a new one, or when a harmless-looking call quietly mutates state, the code stops being trustworthy. It may still work, but it starts lying.
 
-Your job when using this skill is to make the code more truthful, more local, more searchable, and easier to change without breaking intent.
+Your job is to make the code easier to trust, easier to follow, and safer to change.
 
-## Working stance
+## Default posture
 
-- Start by identifying the code's real job before proposing edits.
-- Prefer the smallest refactor that makes intent obvious.
-- Preserve behavior unless the user asked for behavioral change or the current behavior is clearly misleading or broken.
-- Preserve external contracts unless it is clearly safe to change them. Be especially careful with exported names, public method names, return shapes, and persisted field names.
-- Do not confuse interface stability with local naming conservatism. Parameter names, local variables, and private helpers should usually be improved aggressively when that does not change the observable contract.
-- When a public API is awkward but must remain stable, introduce clearer internal entry points and keep the old API as a thin compatibility wrapper when that materially improves the design.
-- Do not refactor just because a refactor is possible. If the code is already clear, compact, and honest, prefer restraint.
-- Favor code that explains itself over code that requires explanatory comments.
-- Preserve existing project conventions when they are coherent; standardize only where inconsistency is actively hurting readability.
-- Do not over-refactor. Every extracted helper should earn its place by making the calling code easier to understand.
-- Respect context-specific tradeoffs such as framework idioms, performance-sensitive paths, public API obligations, and the different readability goals of test code.
+- Read the code until you understand what it is trying to do.
+- Keep behavior stable unless the user asked for a behavior change or the current behavior is plainly wrong.
+- Keep public contracts stable unless it is clearly safe or explicitly useful to change them.
+- Be much less conservative with locals, parameters, private helpers, and internal structure.
+- Prefer the smallest change that makes the code read better.
+- If the code is already clear and honest, do not touch it just to leave fingerprints.
+- Remember that readability is not decoration. It is how the next developer avoids making the wrong change.
 
-## Operating flow
+## Working order
 
-Follow this order when applying the skill:
+1. Figure out the real job of the code.
+2. Decide whether the right move is refactoring or restraint.
+3. Look for the highest-cost lie: bad names, mixed responsibilities, hidden mutation, stale comments, awkward control flow, or duplication.
+4. Fix the core problem first.
+5. Re-read the result top to bottom and check that the code now says what it actually does.
 
-1. Read the surrounding code to understand the intent, inputs, outputs, and side effects.
-2. Decide whether the code actually needs refactoring, or whether restraint is the higher-quality move.
-3. Compare names, comments, structure, and signatures against the actual behavior.
-4. Identify the highest-cost readability or correctness problems first.
-5. Refactor toward smaller units, clearer names, cleaner boundaries, and more local state.
-6. Re-check that the edited code still tells the same story as the behavior.
+If you can describe the code in plain language after the refactor, but had to decode it before, you are probably moving in the right direction.
 
-During refactoring, prefer improvements that keep the surface area stable while making the internals clearer.
+## What good output looks like
 
-## What to optimize for
+Aim for code that:
 
-Optimize for code that:
-
-- tells the truth about what it does,
-- does not force readers to decode names,
-- keeps one level of abstraction per function,
+- reads without translation,
+- keeps one level of abstraction at a time,
 - makes side effects visible,
-- minimizes duplication,
-- uses comments only for information code cannot carry,
-- and stays easy to search, test, discuss, and change.
+- does not depend on comments for basic clarity,
+- stays easy to search and discuss,
+- and does not add ceremony for its own sake.
 
-## Priority order
+## Judgment calls
 
-When several improvements are possible, prefer this order:
+These matter as much as the usual clean-code rules.
 
-1. Fix misleading names.
-2. Split mixed responsibilities.
-3. Remove hidden side effects.
-4. Reduce duplication.
-5. Replace comment-dependent clarity with code-dependent clarity.
-6. Improve file and formatting structure.
+### Prefer restraint over churn
 
-## Judgment rules
+- A zero-diff result is valid.
+- Do not rename things just to make them sound fancier.
+- Do not introduce helpers, wrappers, value objects, or type aliases unless they make the code easier to follow.
+- Do not "improve" code that is already compact, idiomatic, and truthful.
+- The goal is not to look active. The goal is to reduce reader effort.
 
-These rules exist to keep the skill from becoming mechanically "clean" instead of genuinely useful.
+### Preserve real context
 
-### Prefer restraint when the code is already good
+- Keep comments that carry domain knowledge, protocol history, production constraints, legal requirements, or hard-won operational lessons.
+- Remove comments that only narrate the mechanics.
+- If a comment still matters, keep it or rewrite it more clearly. Do not delete it just because comments are usually bad.
+- A good comment protects future maintainers from a mistake the code alone would not prevent.
 
-Apply this when the code is already clear, compact, and locally honest.
+### Respect the environment the code lives in
 
-Why this matters:
+- Hot paths need judgment. Do not trade direct code for pretty but slower abstractions.
+- Framework code may look odd for a reason. Understand the idiom before changing it.
+- Tests are specs. A little repetition is fine when it keeps each case obvious.
+- If the prompt explicitly allows redesign, do not hide behind compatibility when the interface itself is the problem.
+- The best refactor depends on context. The same change can be clean in one file and wrong in another.
 
-- A needless refactor creates churn without adding understanding.
-- Over-editing is a correctness risk because every change has blast radius.
+## Naming
 
-What to do:
+### Use names that carry meaning
 
-- Leave already-good code mostly alone.
-- Fix only the genuinely weak point if one exists.
-- A zero-diff result is valid when the code is already clear, idiomatic, and honest.
-- Do not make polish-only changes such as ceremonial type aliases, annotation churn, or renames that add no real clarity.
-- Do not invent helpers, wrappers, or abstractions just to look active.
-- Do not rename semantically precise identifiers into more dramatic but less accurate names.
+- Replace vague names like `data`, `value`, `item`, `tmp`, `res`, or single letters when the scope is larger than a tiny loop.
+- Name things for what they mean in the domain, not for their type.
+- Pick the most accurate name, not the most dramatic one.
+- If a comment is working hard to explain a name, the name is probably the real problem.
+- A good name should tell the reader why the thing exists, what role it plays, and how to use it without sending them hunting through the file.
 
-### Respect domain comments that carry real knowledge
+### Make distinctions real
 
-Apply this when comments encode protocol quirks, regulatory rules, production incidents, performance constraints, or other non-obvious why.
+- Different names should mark real differences in responsibility or behavior.
+- Avoid filler suffixes like `Manager`, `Handler`, `Processor`, or numbered variants unless they actually help a reader choose correctly.
+- Do not make readers keep a private abbreviation dictionary in their head.
+- If two things have different names, a reader should feel the difference before opening the implementation.
 
-Why this matters:
+### Keep names speakable and searchable
 
-- Some knowledge cannot be recovered from the code alone.
-- Deleting those comments can erase the reason the code is safe.
+- Prefer names people can say out loud in review.
+- Reserve short throwaway names for truly tiny local scopes.
+- Turn magic values into named constants when the value has domain meaning.
 
-What to do:
+## Functions
 
-- Keep comments that explain external constraints or surprising historical facts that still matter.
-- Rewrite those comments only to make them clearer or more precise.
-- Remove only the comments that restate mechanics or add noise.
+### Keep the top level readable
 
-### Respect performance-sensitive paths
+- A function should read like a short story, not a pile of mechanics.
+- Push detail down when it helps the main path read clearly.
+- Do not extract helpers mechanically. A helper should earn its place by making the caller simpler.
+- The top-level function should read like the headline. The lower-level helpers can carry the details.
 
-Apply this when the code runs in a hot path, tight loop, parser, serializer, ranking pass, rendering-critical path, or similar performance-sensitive context.
+### One job per function
 
-Why this matters:
+- If a function validates, transforms, saves, logs, and notifies, it is doing too much.
+- Split work along real responsibility lines.
+- A function should have one reason to change.
+- If you can divide a function into named sections, that is usually a sign that the function is carrying more than one idea.
 
-- Some readability patterns add allocations, callbacks, indirection, or repeated work that are harmless elsewhere but inappropriate here.
-- A pretty refactor can still be a bad engineering decision.
+### Keep one level of abstraction at a time
 
-What to do:
+- Do not mix business policy with low-level detail in the same breath.
+- Let higher-level functions orchestrate.
+- Let helpers handle the lower-level steps.
+- Good code should read top-down, one layer at a time, like a small narrative that keeps descending into detail only when needed.
 
-- Improve naming and local clarity first.
-- Keep direct loops and compact logic when they are the right tradeoff.
-- Do not replace simple hot-path code with abstraction-heavy style unless the gain clearly outweighs the cost.
+### Be honest about mutation
 
-### Respect framework idioms and semantic patterns
+- If a function mutates state, the name and structure should make that obvious.
+- Separate pure checks from commands when you can.
+- Query-shaped names should not quietly write to sessions, caches, files, or shared fields.
+- A function that sounds harmless but changes the world is the kind of lie that turns into a bug later.
 
-Apply this when code looks unusual because the framework, runtime, or library expects that structure.
+### Avoid awkward call surfaces
 
-Why this matters:
-
-- Some code is non-obvious for semantic reasons, not because it is sloppy.
-- Flattening those patterns into "cleaner" code can silently break behavior.
-
-What to do:
-
-- Understand why the pattern exists before changing it.
-- Preserve stale-closure guards, lifecycle ordering, hook semantics, transactional boundaries, or other framework-specific constraints when they are intentional.
-- If the idiom is already clear, prefer no change over cosmetic cleanup.
-- Improve naming and surrounding structure without erasing the semantic reason for the pattern.
-- In framework state/ref code, keep names aligned with the actual time or ownership semantics. Prefer `latest`, `current`, or `previous` when those are the literal meanings.
-
-### Treat tests as readability-first specifications
-
-Apply this when working on unit tests, integration tests, fixtures, or assertions.
-
-Why this matters:
-
-- Tests are read to understand behavior, not just to remove duplication.
-- Repetition in tests is often acceptable when it keeps each case obvious.
-
-What to do:
-
-- Prefer explicit test intent over clever abstraction.
-- Deduplicate only when duplication is genuinely hiding the scenario.
-- Do not turn simple tests into loops, helpers, or meta-structures that obscure what each case proves.
-
-### Be bolder when redesign is explicitly allowed
-
-Apply this when the user invites redesign, API cleanup, or stronger behavioral restructuring rather than mere compatibility-preserving cleanup.
-
-Why this matters:
-
-- Over-learning "preserve the interface" can turn into timidity.
-- Sometimes the cleanest and most honest fix is to redesign the awkward surface itself.
-
-What to do:
-
-- If the prompt explicitly allows interface change, evaluate the public design itself instead of assuming it is fixed.
-- Remove flag-driven or mixed-responsibility APIs when redesign is clearly the better outcome.
-- Do not keep a bad surface forever just because earlier evals trained caution.
-
-## Naming rules
-
-### Use intention-revealing names
-
-Apply this when a reader has to inspect surrounding logic to understand a name.
-
-Why this matters:
-
-- Code is read far more often than it is written.
-- A weak name makes every future read slower.
-- A name that hides intent forces the reader to reconstruct meaning from context.
-
-What to do:
-
-- Replace vague names such as `data`, `value`, `item`, `d`, `res`, or `tmp` with names that reveal business purpose.
-- Prefer names that explain what the value means in this code, not what type it happens to be.
-- Prefer the most semantically exact name, not the most elaborate-sounding one.
-- If a comment exists only to explain a name, improve the name first.
-
-### Make meaningful distinctions
-
-Apply this when names sound different but do not help the reader distinguish responsibilities.
-
-Why this matters:
-
-- Different names imply different roles.
-- Generic suffixes create fake distinctions and increase hesitation.
-
-What to do:
-
-- Avoid filler names like `Manager`, `Handler`, `Processor`, `Info`, or numbered variants unless the distinction is real and obvious.
-- Rename items according to their specific responsibility.
-- Make behavioral differences visible in the names themselves.
-
-### Use pronounceable names
-
-Apply this when names are compact but awkward to say.
-
-Why this matters:
-
-- Code is discussed aloud in reviews and pairing.
-- Unpronounceable names are harder to remember and harder to coordinate around.
-
-What to do:
-
-- Prefer real words over compressed abbreviations.
-- Rename identifiers that cannot be said naturally in conversation.
-
-### Use searchable names
-
-Apply this when an identifier has broad scope or long-term importance.
-
-Why this matters:
-
-- Single letters and raw numbers are difficult to search meaningfully.
-- Searchability is part of maintainability.
-
-What to do:
-
-- Reserve single letters for tiny, obvious local scopes.
-- Give constants, fields, helpers, and reused values names that can be found quickly across the codebase.
-- Replace magic numbers with named constants when the value carries domain meaning.
-
-### Avoid encodings
-
-Apply this when names include type or storage hints that tooling already provides.
-
-Why this matters:
-
-- Type encodings spend name-space on information the IDE already knows.
-- That pushes out the more important information: purpose.
-
-What to do:
-
-- Remove Hungarian notation or similar prefixes when they only restate type.
-- Keep the name focused on intent and role.
-
-### Avoid mental mapping
-
-Apply this when the code makes the reader translate abbreviations repeatedly.
-
-Why this matters:
-
-- Every translation consumes attention.
-- The reader should spend effort on behavior, not decoding vocabulary.
-
-What to do:
-
-- Replace cryptic abbreviations with domain words.
-- Make formulas, predicates, and loops readable without a translation table.
-
-## Function rules
-
-### Keep functions small
-
-Apply this when the main idea is buried inside mechanics.
-
-Why this matters:
-
-- Long functions hide intent under detail.
-- The reader has to separate story from implementation by hand.
-
-What to do:
-
-- Extract dense blocks, nested loops, and low-level mechanics into helpers with names that expose intent.
-- Let the top-level function read as a short sequence of meaningful steps.
-
-### Make each function do one thing
-
-Apply this when a function can be split into clearly different sections.
-
-Why this matters:
-
-- Multiple responsibilities create multiple reasons to change.
-- Mixed tasks make testing and modification riskier.
-
-What to do:
-
-- If you can name internal sections differently, split them.
-- If an extracted helper would get a meaningful name, that responsibility likely deserves its own function.
-- Keep the top-level function centered on one idea.
-
-### Keep one level of abstraction per function
-
-Apply this when business intent and low-level implementation are mixed together.
-
-Why this matters:
-
-- Mixed abstraction obscures flow.
-- The reader gets dragged between policy and syntax.
-
-What to do:
-
-- Keep orchestration code high-level.
-- Push implementation details into subordinate helpers.
-- Aim for top-down reading where each function leads naturally to the next depth level.
-
-### Bury repeated switches
-
-Apply this when type-based branching repeats across several places.
-
-Why this matters:
-
-- Repeated switches spread change risk.
-- Adding one new case means editing many sites.
-
-What to do:
-
-- Consolidate creation or dispatch in one place.
-- Prefer polymorphism or behavior objects when repeated branching is part of the design.
-
-### Keep argument count low
-
-Apply this when a function call carries too much mental weight.
-
-Why this matters:
-
-- Extra parameters create ordering confusion and increase misuse risk.
-- Long parameter lists often indicate a missing abstraction.
-
-What to do:
-
-- Prefer zero, one, or two arguments when practical.
-- When arguments pile up, look for a missing object or concept.
-- Group related data under a meaningful name.
-
-### Avoid flag arguments
-
-Apply this when a boolean argument changes which job the function performs.
-
-Why this matters:
-
-- Flag arguments often mean one function is doing two jobs.
-- Call sites become less readable because `true` or `false` rarely explains itself.
-
-What to do:
-
-- Split flag-driven branches into separate functions when they represent different behaviors.
-- Keep boolean data only when it is actual domain data, not a mode selector.
-- Avoid replacing one unclear flag with a combinatorial explosion of wrapper functions. Prefer a cleaner core function plus explicit orchestration where needed.
-
-### Avoid output arguments
-
-Apply this when a function mutates an input parameter to communicate a result.
-
-Why this matters:
-
+- Too many arguments usually means the code is missing a concept.
+- Flag arguments often mean one function is doing multiple jobs.
 - Output arguments hide data flow.
-- They violate the common expectation that data comes in through arguments and leaves through return values.
+- When redesign is allowed, fix the awkward surface itself. When redesign is not allowed, clean up the internals and keep the public shape as a thin compatibility layer if needed.
+- Arguments carry mental weight. If the call site makes the reader stop to decode order or meaning, the design still needs work.
 
-What to do:
+### Remove duplication carefully
 
-- Return values instead of mutating caller-owned output containers.
-- Make data movement visible at the call site.
+- Duplication is bad when the same rule has to be updated in multiple places.
+- Duplication is fine when removing it would hide the main story or make tests harder to read.
+- Do not chase DRY so hard that the code becomes indirect.
+- One truth in one place is the goal, but not at the cost of turning readable code into a maze.
 
-### Preserve interface stability while refactoring internals
+## Comments and docs
 
-Apply this when a cleaner internal design would require changing public names or call shapes.
+### Treat comments with suspicion, not contempt
 
-Why this matters:
+- Most comments should not need to exist.
+- Some comments are the only place where the important why lives.
+- First try to make the code clearer.
+- If the why still cannot live in code, keep the comment.
+- Comments are expensive because they create a second thing that can drift out of sync.
 
-- Many readability fixes are internal and do not require breaking external callers.
-- Renaming a public function or changing returned field names can create accidental behavior changes even when the internals improve.
+### Good comments usually explain why
 
-What to do:
+- Keep comments about constraints, tradeoffs, weird external requirements, or surprising decisions.
+- Delete comments that restate obvious code.
+- Delete dead history, commented-out code, and personal diary notes from source files.
+- Do not use comments as lane markers for oversized functions. Fix the structure instead.
+- If a comment only says what the code already says, it is noise. If it protects a business rule or a non-obvious constraint, it earns its place.
 
-- First improve internals without changing the public contract.
-- Only rename exported or externally consumed interfaces when it is clearly safe or explicitly requested.
-- Prefer local variable renames, parameter renames, helper extraction, and internal restructuring before API churn.
-- If the prompt explicitly allows redesign, reconsider whether preserving the old interface is still the right goal.
+### Public APIs need real documentation
 
-### Be careful with pairs and triads
+- If other people consume the code without reading the implementation, document inputs, outputs, failure modes, and the basic usage shape.
+- Keep that documentation plain and specific.
 
-Apply this when multiple arguments are difficult to distinguish or order correctly.
+## Files and layout
 
-Why this matters:
+### Make files easy to scan
 
-- Some pairs are natural, but unrelated pairs and most triads create confusion.
-- Readers must remember both meaning and ordering.
+- Put the main flow near the top when the language and local style allow it.
+- Keep related helpers together.
+- Use whitespace to separate ideas, not to decorate the file.
+- A file should read like a newspaper: the headline first, supporting detail below, related material grouped together.
 
-What to do:
+### Keep scope local
 
-- Keep only natural pairs as peers.
-- Turn unrelated arguments into an object or move one concept onto the owning object.
-- Use names that make order obvious when order matters.
+- Declare locals near where they are used.
+- Keep shared class state in a predictable place.
+- Do not make readers carry unused names for half a function.
+- Every variable introduced too early becomes mental baggage until the reader finally discovers why it exists.
 
-### Eliminate hidden side effects
+### Follow the house style
 
-Apply this when a function name sounds observational but the function mutates state.
+- Braces, quotes, tabs, spaces, and similar style details are team conventions.
+- Preserve coherent local style unless inconsistency is making the file harder to read.
 
-Why this matters:
+## Fast checklist
 
-- Hidden side effects create surprise bugs.
-- Callers trust names; misleading names create unsafe assumptions.
+Before finishing, check:
 
-What to do:
-
-- Rename the function if mutation is its true job.
-- Prefer splitting the check from the mutation.
-- Make side effects explicit in structure and naming.
-
-### Separate commands from queries
-
-Apply this when one function both answers a question and changes state.
-
-Why this matters:
-
-- A question should be safe to ask.
-- Mixing commands and queries makes calls harder to reason about and reuse.
-
-What to do:
-
-- Use one function to return information and another to perform the mutation.
-- Keep query-like names read-only.
-- Keep command-like names obviously mutating.
-- If an existing public function mixes both and cannot be safely removed, keep it as a compatibility wrapper over clearer internal command/query operations.
-
-### Prefer exceptions over error codes when appropriate
-
-Apply this when normal flow is overwhelmed by repeated status checking.
-
-Why this matters:
-
-- Error codes spread branching across every call site.
-- Shared status enums couple many files together.
-
-What to do:
-
-- Let the success path read as straight-line logic.
-- Handle exceptional flow in dedicated error handling paths.
-- Keep happy-path code and error-handling code clearly separated.
-
-### Remove duplication
-
-Apply this when the same knowledge appears in more than one place.
-
-Why this matters:
-
-- Duplication multiplies maintenance work.
-- One missed update creates inconsistent behavior.
-
-What to do:
-
-- Extract shared request logic, calculations, policy rules, and validation.
-- Keep one authoritative representation of each rule or idea.
-
-### Rewrite toward clarity
-
-Apply this after code is working but still messy.
-
-Why this matters:
-
-- First drafts are usually organized around getting the code to run.
-- Clean structure often appears only after refactoring.
-
-What to do:
-
-- Use tests as a safety net.
-- Improve names, split functions, remove duplication, and simplify the flow.
-- Treat refactoring as part of finishing the work.
-
-## Comment and documentation rules
-
-### Start from skepticism
-
-Default assumption: most comments should not exist.
-
-Why this matters:
-
-- Code evolves faster than comments.
-- A stale comment is worse than no comment because it misleads confidently.
-
-What to do:
-
-- First try to remove the need for the comment by renaming, extracting, or restructuring.
-- Keep comments when the code cannot carry the important information alone, especially for external constraints, surprising tradeoffs, or protocol history that still matters.
-
-### Use comments for why, not what
-
-Apply this when the important information is a constraint or rationale rather than a mechanic.
-
-Why this matters:
-
-- Code usually shows how.
-- Comments are most valuable when they explain business rules, tradeoffs, or external constraints.
-
-What to do:
-
-- Comment business reasons, legal constraints, performance tradeoffs, and surprising decisions.
-- Do not restate code that already reads clearly.
-
-### Use warnings, amplification, and TODOs deliberately
-
-Apply this when future maintainers are likely to make a well-intentioned but wrong change.
-
-Why this matters:
-
-- Some lines look unnecessary until context is known.
-- Without a warning, later cleanup may silently break behavior.
-
-What to do:
-
-- Add warnings where an obvious-looking simplification would be dangerous.
-- Add amplification where a small line has disproportionate impact.
-- Keep TODOs only when there is a real blocker, dependency, or deferred external fix.
-
-### Document public APIs for external readers
-
-Apply this when the code is a library or public interface used by people who will not read the implementation.
-
-Why this matters:
-
-- Internal code and public APIs have different audiences.
-- External users need usage guidance, not implementation archaeology.
-
-What to do:
-
-- Document what it does, inputs, outputs, failure modes, and a small example.
-- Keep legal headers standard and minimal when required.
-
-### Remove noisy comments
-
-Apply this when a comment only labels or repeats obvious code.
-
-Why this matters:
-
-- Noise comments double scan time without adding meaning.
-- Too much noise trains readers to ignore all comments.
-
-What to do:
-
-- Delete comments that merely restate the code.
-- Delete mandatory-but-empty doc comments.
-- Interrupt the reader only when there is information the code cannot deliver.
-
-### Remove misleading comments
-
-Apply this when a comment is vague, incomplete, or refers to logic too loosely.
-
-Why this matters:
-
-- A misleading comment creates false confidence.
-- Readers stop checking the code because they think the comment already explained it.
-
-What to do:
-
-- Keep comments specific, local, and easy to verify against nearby code.
-- Delete or rewrite comments that require guessing.
-- Do not document behavior that is actually controlled somewhere else unless the dependency is explicit and stable.
-
-### Delete dead history from source files
-
-Apply this when source files contain commented-out code, author tags, or inline changelogs.
-
-Why this matters:
-
-- Version control already keeps history better.
-- Inline history clutters present-day reasoning.
-
-What to do:
-
-- Remove commented-out code.
-- Remove attribution headers and manual change logs from source files.
-- Trust version control for recovery and history.
-
-### Do not use comments as structural crutches
-
-Apply this when comments exist mainly to navigate oversized functions or files.
-
-Why this matters:
-
-- Section markers and closing-brace comments usually signal structure problems, not documentation needs.
-
-What to do:
-
-- Shorten the function.
-- Split the file by responsibility.
-- Use comments as the last fix, not the first one.
-
-### Keep comments plain and readable
-
-Apply this when comments are filled with personal shorthand, irrelevant stories, or formatting noise.
-
-Why this matters:
-
-- Comments should be readable in raw source form.
-- If the comment itself is hard to read, it has failed.
-
-What to do:
-
-- Use plain text.
-- Remove vague notes and irrelevant history.
-- Rewrite or delete comments that are hard to parse quickly.
-
-## File and formatting rules
-
-### Organize files like a newspaper
-
-Apply this when file order makes readers jump around to follow the main flow.
-
-Why this matters:
-
-- The reader should meet the highest-level idea first.
-- Predictable ordering lowers navigation cost.
-
-What to do:
-
-- Put top-level orchestration near the top of the file.
-- Define helpers below the code that calls them when the language and project style allow it.
-- Group related helpers together by purpose.
-
-### Use vertical spacing to show concepts
-
-Apply this when code is visually flat or randomly spaced.
-
-Why this matters:
-
-- Readers scan structure before reading details.
-- Spacing should reveal conceptual grouping.
-
-What to do:
-
-- Use blank lines to separate distinct ideas.
-- Keep tightly related lines visually dense.
-- Avoid both wall-of-text formatting and arbitrary spacing.
-
-### Keep declarations near use
-
-Apply this when local variables are declared long before they matter.
-
-Why this matters:
-
-- Early declarations add cognitive baggage.
-- The reader carries names in memory before they become useful.
-
-What to do:
-
-- Move local variables into the narrowest reasonable scope.
-- Introduce a name when the reader is ready to use it.
-
-### Keep shared class properties in one predictable place
-
-Apply this when shared fields are scattered near individual methods.
-
-Why this matters:
-
-- Class properties are shared resources, not local details.
-- Scattering them makes class-wide dependencies harder to see.
-
-What to do:
-
-- Group class properties where the team expects to find them.
-- Optimize for class-level discoverability, not local convenience.
-
-### Let the team standardize the rest
-
-Apply this to braces, quotes, indentation, and similar style conventions.
-
-Why this matters:
-
-- Many style decisions are team conventions rather than universal truths.
-- Consistency removes distraction.
-
-What to do:
-
-- Preserve coherent local conventions.
-- Standardize only when inconsistency harms readability.
-
-## Decision guide: refactor before commenting
-
-When code is hard to understand, try these in order:
-
-1. Rename the thing.
-2. Extract the thing.
-3. Introduce a named constant or helper.
-4. Reorganize the function or file.
-5. Add a comment only if the essential information still cannot be expressed clearly in code.
-
-## Final check
-
-Before finishing, verify that:
-
-- names match behavior,
-- the code was changed only where the change earned its keep,
-- functions have focused responsibilities,
-- abstraction levels are not mixed carelessly,
-- side effects are visible,
-- comments are accurate and necessary,
-- performance-sensitive or framework-specific constraints were respected,
-- duplication has been reduced where practical,
-- and formatting supports reading instead of distracting from it.
+- are the names honest?
+- does each function have a clear job?
+- are side effects easy to spot?
+- did you preserve the right comments and delete the useless ones?
+- did you avoid abstraction that only adds ceremony?
+- did you respect hot paths, framework idioms, and test readability?
+- did you leave good code alone where that was the best choice?
 
 ## Release notes
 
+### 0.1.1
+
+- tightened the wording to be more direct and less generic
+- kept the same guidance, but stripped out fluff and repeated prompt-like phrasing
+
+### 0.1.2
+
+- brought back more of the explanatory voice from the source transcripts
+- kept the text direct, but restored the didactic parts that help an agent judge code instead of just applying rules
+
 ### 0.1.0
 
-- Initial public release.
-- Built from a transcript-derived clean-code guidance set focused on code intent, naming honesty, explicit side effects, top-down readability, and refactoring restraint.
-- Hardened through iterative evaluation, including transcript-aware grading and adversarial checks for over-refactoring, framework idioms, performance-sensitive code, public API design, and test readability.
+- first public release
+- transcript-derived guidance for naming, functions, comments, side effects, restraint, and code intent
+- hardened through iterative and adversarial evaluation
