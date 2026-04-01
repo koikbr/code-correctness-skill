@@ -2,7 +2,40 @@
 
 clean code is not decoration. it is how code tells the truth.
 
-this repository publishes the `code-correctness` skill for the open agent skills ecosystem.
+this repository publishes the modular `code-correctness` skill for the open agent skills ecosystem.
+
+## what changed
+
+the skill is now organized as a modular lesson tree:
+
+- the top-level `skills/code-correctness/SKILL.md` is the orchestrator
+- the theme folders contain lesson modules
+- each lesson module is grounded in one reel from the saved `s4.codes` series
+- the previous monolithic skill is preserved as `references/monolithic-backup.md`
+
+## repository layout
+
+```text
+skills/
+  code-correctness/
+    SKILL.md
+    README.md
+    meaningful-names/
+    functions/
+    comments/
+    formatting/
+    objects-and-data/
+    references/
+```
+
+## attribution
+
+the modular lesson tree is based on the public `s4.codes` clean-code reel series.
+
+- the saved reel descriptions and transcriptions are used as lesson source material
+- the tree should keep being updated as more videos in the series are released
+
+thanks to `s4.codes` for publishing the series and making the principles concrete enough to turn into a usable skill system.
 
 ## install
 
@@ -24,27 +57,12 @@ install only this skill:
 npx skills add koikbr/code-correctness-skill --skill code-correctness
 ```
 
-## repository layout
+## open source
 
-```text
-skills/
-  code-correctness/
-    SKILL.md
-    README.md
-```
-
-the `skills/` layout is used so tools like `npx skills` and skills.sh can discover the skill more consistently.
-
-## current skill
-
-- `code-correctness` - judgment-heavy code review and refactoring guidance focused on truthful naming, explicit side effects, clean function boundaries, restraint, and real engineering tradeoffs
+yes. this repository is open source under `GPL-3.0`.
 
 ## support
 
 - website: https://koik.com.br
 - github: https://github.com/koikbr/code-correctness-skill
 - support: oi@koik.com.br
-
-## license
-
-GNU GPL v3.0. see `LICENSE` and `skills/code-correctness/SKILL.md`.
