@@ -1,17 +1,21 @@
 # code-correctness
 
-clean code is not about making code look expensive. it is about making code easier to trust.
+clean code is not decoration. it is how code tells the truth.
 
-`code-correctness` is now organized as a modular skill tree.
+`code-correctness` is organized as a modular skill tree.
 
-- the top-level `SKILL.md` is the orchestrator
-- the theme folders contain lesson modules
-- each lesson module is grounded in one reel from the `s4.codes` series
-- the old monolithic skill is preserved as a backup reference in `references/monolithic-backup.md`
+## what it is
 
-## architecture
+this skill contains:
 
-the skill tree is organized by theme:
+- the top-level `SKILL.md` orchestrator
+- a full lesson tree organized by theme
+- one lesson module per reel from the saved `s4.codes` series
+- a monolithic backup reference for broad tasks
+
+the active entrypoint is `SKILL.md`. it tells the model to read the full lesson tree, then explain reviews and refactors using the intention of the most relevant lessons.
+
+## lesson themes
 
 - `meaningful-names/`
 - `functions/`
@@ -19,17 +23,15 @@ the skill tree is organized by theme:
 - `formatting/`
 - `objects-and-data/`
 
-the active entrypoint is `SKILL.md`. it tells the model to read the full lesson tree, then explain reviews and refactors using the intention of the most relevant lessons.
-
 ## what it helps with
 
-- confusing names
+- confusing or misleading names
 - long or mixed-responsibility functions
 - hidden side effects
 - stale, noisy, or misleading comments
 - file structure and readability issues
 - weak abstraction boundaries
-- code that is technically fine but annoying to read or risky to change
+- behavior-preserving refactors grounded in explicit lessons
 
 ## what it does differently
 
@@ -39,64 +41,33 @@ the active entrypoint is `SKILL.md`. it tells the model to read the full lesson 
 - it respects framework idioms and hot paths
 - it keeps the old monolithic version as a fallback instead of throwing it away
 
-## attribution
+## acknowledgements
 
 the modular lesson tree is based on the public `s4.codes` clean-code reel series.
 
-- source account: `s4.codes`
-- this skill uses the saved reel descriptions and transcriptions as the lesson source material
-- the lesson tree should keep being updated as more videos from the series come out
+- instagram: `https://instagram.com/s4.codes`
+- the saved reel descriptions and transcriptions are used as lesson source material
+- the tree is intended to keep growing as more videos in the series come out
 
-thanks to `s4.codes` for publishing the series and making the principles concrete enough to turn into a usable skill system.
+thanks to `s4.codes` for publishing the series and making the principles concrete enough to turn into a reusable skill system.
 
 ## install
-
-### direct from github
 
 ```bash
 npx skills add koikbr/code-correctness-skill
 ```
 
-list what the repo exposes:
+list the available skill before installing:
 
 ```bash
 npx skills add koikbr/code-correctness-skill --list
 ```
 
-install only this skill explicitly:
+install only `code-correctness`:
 
 ```bash
 npx skills add koikbr/code-correctness-skill --skill code-correctness
 ```
-
-### manual
-
-copy or symlink the folder into your local skills directory:
-
-```bash
-mkdir -p ~/.agents/skills
-cp -r code-correctness ~/.agents/skills/
-```
-
-for Claude Code, a common location is:
-
-```bash
-mkdir -p ~/.claude/skills
-cp -r code-correctness ~/.claude/skills/
-```
-
-## when to use it
-
-use it when the task is about improving existing code, especially if the user says things like:
-
-- this function is too long
-- these names are confusing
-- this code is hard to follow
-- clean up these comments
-- this file is messy
-- should this be a class
-- refactor without changing behavior
-- make this easier to maintain
 
 ## files
 
@@ -107,21 +78,16 @@ use it when the task is about improving existing code, especially if the user sa
 - `formatting/*/SKILL.md` - lesson modules for file and layout structure
 - `objects-and-data/*/SKILL.md` - lesson modules for abstraction and design choices
 - `references/monolithic-backup.md` - previous all-in-one version kept as backup
-- `README.md` - overview and install notes
 
 ## open source
 
-yes, this is open source.
+yes, this skill is open source.
 
 - license: `GPL-3.0`
-- repo: `https://github.com/koikbr/code-correctness-skill`
+- repository: `https://github.com/koikbr/code-correctness-skill`
 
 ## support
 
 - website: https://koik.com.br
 - github: https://github.com/koikbr/code-correctness-skill
 - email: oi@koik.com.br
-
-## author
-
-koi
