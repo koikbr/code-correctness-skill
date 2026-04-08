@@ -4,7 +4,7 @@ description: Guide and orchestrator for the modular code-correctness lesson tree
 license: GPL-3.0
 metadata:
   authors: "koi"
-  version: "0.2.0"
+  version: "0.2.3"
   website: "https://koik.com.br"
   github: "https://github.com/koikbr/code-correctness-skill"
   support: "mailto:oi@koik.com.br"
@@ -143,12 +143,18 @@ Intention:
 Typical lesson files:
 - `objects-and-data/01-data-abstraction/SKILL.md`
 - `objects-and-data/02-data-object-anti-symmetry/SKILL.md`
+- `objects-and-data/03-law-of-demeter/SKILL.md`
+- `objects-and-data/04-hybrids-dtos-and-active-records/SKILL.md`
 
 Typical triggers:
 - should this be a class
 - too much raw data exposure
 - object versus function design
 - wrong abstraction boundary
+- deep method chaining
+- tell don't ask problems
+- hybrid class smell
+- dto versus active record confusion
 
 ## Using the full curriculum
 
@@ -205,11 +211,3 @@ Do not mention lesson names mechanically. Mention them when they help anchor the
 - Do not use lesson references as permission to over-refactor.
 - If the code is already clear and honest, say so.
 - If two lessons point in different directions, explain the tradeoff instead of pretending there is one obvious answer.
-
-## Backup reference
-
-If you need the previous all-in-one version of this skill, read:
-
-- `references/monolithic-backup.md`
-
-That file is now a fallback reference, not the primary operating model.

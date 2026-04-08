@@ -1,21 +1,17 @@
 # code-correctness
 
-clean code is not decoration. it is how code tells the truth.
+clean code is not about making code look expensive. it is about making code easier to trust.
 
-`code-correctness` is organized as a modular skill tree.
+`code-correctness` is now organized as a modular skill tree.
 
-## what it is
+- the top-level `SKILL.md` is the orchestrator
+- the theme folders contain lesson modules
+- each lesson module is grounded in one reel from the `s4.codes` series
+- the old monolithic skill is preserved as a backup reference in `references/monolithic-backup.md`
 
-this skill contains:
+## architecture
 
-- the top-level `SKILL.md` orchestrator
-- a full lesson tree organized by theme
-- one lesson module per reel from the saved `s4.codes` series
-- a monolithic backup reference for broad tasks
-
-the active entrypoint is `SKILL.md`. it tells the model to read the full lesson tree, then explain reviews and refactors using the intention of the most relevant lessons.
-
-## lesson themes
+the skill tree is organized by theme:
 
 - `meaningful-names/`
 - `functions/`
@@ -23,15 +19,17 @@ the active entrypoint is `SKILL.md`. it tells the model to read the full lesson 
 - `formatting/`
 - `objects-and-data/`
 
+the active entrypoint is `SKILL.md`. it tells the model to read the full lesson tree, then explain reviews and refactors using the intention of the most relevant lessons.
+
 ## what it helps with
 
-- confusing or misleading names
+- confusing names
 - long or mixed-responsibility functions
 - hidden side effects
 - stale, noisy, or misleading comments
 - file structure and readability issues
 - weak abstraction boundaries
-- behavior-preserving refactors grounded in explicit lessons
+- code that is technically fine but annoying to read or risky to change
 
 ## what it does differently
 
@@ -53,21 +51,52 @@ thanks to `s4.codes` for publishing the series and making the principles concret
 
 ## install
 
+### direct from github
+
 ```bash
 npx skills add koikbr/code-correctness-skill
 ```
 
-list the available skill before installing:
+list what the repo exposes:
 
 ```bash
 npx skills add koikbr/code-correctness-skill --list
 ```
 
-install only `code-correctness`:
+install only this skill explicitly:
 
 ```bash
 npx skills add koikbr/code-correctness-skill --skill code-correctness
 ```
+
+### manual
+
+copy or symlink the folder into your local skills directory:
+
+```bash
+mkdir -p ~/.agents/skills
+cp -r code-correctness ~/.agents/skills/
+```
+
+for Claude Code, a common location is:
+
+```bash
+mkdir -p ~/.claude/skills
+cp -r code-correctness ~/.claude/skills/
+```
+
+## when to use it
+
+use it when the task is about improving existing code, especially if the user says things like:
+
+- this function is too long
+- these names are confusing
+- this code is hard to follow
+- clean up these comments
+- this file is messy
+- should this be a class
+- refactor without changing behavior
+- make this easier to maintain
 
 ## files
 
@@ -78,16 +107,21 @@ npx skills add koikbr/code-correctness-skill --skill code-correctness
 - `formatting/*/SKILL.md` - lesson modules for file and layout structure
 - `objects-and-data/*/SKILL.md` - lesson modules for abstraction and design choices
 - `references/monolithic-backup.md` - previous all-in-one version kept as backup
+- `README.md` - overview and install notes
 
 ## open source
 
-yes, this skill is open source.
+yes, this is open source.
 
 - license: `GPL-3.0`
-- repository: `https://github.com/koikbr/code-correctness-skill`
+- repo: `https://github.com/koikbr/code-correctness-skill`
 
 ## support
 
 - website: https://koik.com.br
 - github: https://github.com/koikbr/code-correctness-skill
 - email: oi@koik.com.br
+
+## author
+
+koi
